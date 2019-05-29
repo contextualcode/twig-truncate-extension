@@ -1,5 +1,5 @@
 {
-    "name": "bluetel-solutions/twig-truncate-extension",
+    "name": "contextualcode/twig-truncate-extension",
     "description": "Twig Extension to truncate nested HTML, safely!",
     "keywords": ["twig extension", "truncate", "twig"],
     "type": "library",
@@ -21,9 +21,9 @@
         }
     ],
     "autoload": {
-        "psr-4": { "Bluetel\\Twig\\": "src/" }
+        "psr-4": { "ContextualCode\\TruncateExtension\\Twig\\": "src/" }
     },
     "autoload-dev": {
-        "psr-4": { "Bluetel\\Twig\\Tests\\": "tests/" }
+        "psr-4": { "ContextualCode\\TruncateExtension\\Tests\\": "tests/" }
     }
 }

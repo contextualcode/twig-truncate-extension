@@ -1,56 +1,41 @@
 <?php
 
-namespace Bluetel\Twig;
+namespace ContextualCode\TruncateExtension\Twig;
 
 use DOMText;
 use DOMDocument;
 use DOMWordsIterator;
 use DOMLettersIterator;
-use Twig_Extension;
-use Twig_SimpleFilter;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 
 /**
  * TruncateExtension
+ * https://github.com/bluetel/twig-truncate-extension.
  * @author Alex Wilson <ajw@bluetel.co.uk>
  * @license MIT
  */
-class TruncateExtension extends Twig_Extension
+class TruncateExtension extends AbstractExtension
 {
     /**
      * @return array Returns the list of filters supplied by this extension.
      */
     public function getFilters()
     {
-        $truncateWords = new Twig_SimpleFilter(
-            'truncate_words',
-            array($this, 'truncateWords'),
-            array(
-                'is_safe' => array('html'),
-            )
-        );
-
-        $truncateLetters = new Twig_SimpleFilter(
-            'truncate_letters',
-            array($this, 'truncateLetters'),
-            array(
-                'is_safe' => array('html'),
-            )
-        );
-
-        return array(
-            'truncate_letters' => $truncateWords,
-            'truncate_words'   => $truncateLetters,
-        );
+        return [
+            new TwigFilter('truncate_words', [$this, 'truncateWords']),
+            new TwigFilter('truncate_letters', [$this, 'truncateLetters']),
+        ];
     }
 
     /**
      * Safely truncates HTML by a given number of words.
      * @param  string  $html     Input HTML.
-     * @param  integer $limit    Limit to how many words we preserve.
+     * @param  int $limit    Limit to how many words we preserve.
      * @param  string  $ellipsis String to use as ellipsis (if any).
      * @return string            Safe truncated HTML.
      */
-    public function truncateWords($html, $limit = 0, $ellipsis = "")
+    public function truncateWords($html, $limit = 0, $ellipsis = '')
     {
         if ($limit <= 0) {
             return $html;
@@ -59,15 +44,13 @@ class TruncateExtension extends Twig_Extension
         $dom = $this->htmlToDomDocument($html);
 
         // Grab the body of our DOM.
-        $body = $dom->getElementsByTagName("body")->item(0);
+        $body = $dom->getElementsByTagName('body')->item(0);
 
         // Iterate over words.
         $words = new DOMWordsIterator($body);
         foreach ($words as $word) {
-
             // If we have exceeded the limit, we delete the remainder of the content.
             if ($words->key() >= $limit) {
-
                 // Grab current position.
                 $currentWordPosition = $words->currentWordPosition();
                 $curNode = $currentWordPosition[0];
@@ -88,20 +71,36 @@ class TruncateExtension extends Twig_Extension
 
                 break;
             }
-
         }
 
-        return $dom->saveHTML();
+        return $this->getBody($dom);
+    }
+
+    /**
+     * Returns just the body,
+     * not the doc type or html
+     * https://stackoverflow.com/a/11254896.
+     * @param DOMDocument $dom
+     */
+    protected function getBody(DOMDocument $dom)
+    {
+        $mock = new DOMDocument();
+        $body = $dom->getElementsByTagName('body')->item(0);
+        foreach ($body->childNodes as $child) {
+            $mock->appendChild($mock->importNode($child, true));
+        }
+
+        return $mock->saveHTML();
     }
 
     /**
      * Safely truncates HTML by a given number of letters.
      * @param  string  $html     Input HTML.
-     * @param  integer $limit    Limit to how many letters we preserve.
+     * @param  int $limit    Limit to how many letters we preserve.
      * @param  string  $ellipsis String to use as ellipsis (if any).
      * @return string            Safe truncated HTML.
      */
-    public function truncateLetters($html, $limit = 0, $ellipsis = "")
+    public function truncateLetters($html, $limit = 0, $ellipsis = '')
     {
         if ($limit <= 0) {
             return $html;
@@ -110,15 +109,13 @@ class TruncateExtension extends Twig_Extension
         $dom = $this->htmlToDomDocument($html);
 
         // Grab the body of our DOM.
-        $body = $dom->getElementsByTagName("body")->item(0);
+        $body = $dom->getElementsByTagName('body')->item(0);
 
         // Iterate over letters.
         $letters = new DOMLettersIterator($body);
         foreach ($letters as $letter) {
-
             // If we have exceeded the limit, we want to delete the remainder of this document.
             if ($letters->key() >= $limit) {
-
                 $currentText = $letters->currentTextPosition();
                 $currentText[0]->nodeValue = substr($currentText[0]->nodeValue, 0, $currentText[1] + 1);
                 self::removeProceedingNodes($currentText[0], $body);
@@ -131,7 +128,7 @@ class TruncateExtension extends Twig_Extension
             }
         }
 
-        return $dom->saveHTML();
+        return $this->getBody($dom);
     }
 
     /**
@@ -159,7 +156,6 @@ class TruncateExtension extends Twig_Extension
      * Removes all nodes after the current node.
      * @param  DOMNode|DOMElement $domNode
      * @param  DOMNode|DOMElement $topNode
-     * @return void
      */
     private static function removeProceedingNodes($domNode, $topNode)
     {
@@ -184,10 +180,9 @@ class TruncateExtension extends Twig_Extension
     }
 
     /**
-     * Inserts an ellipsis
+     * Inserts an ellipsis.
      * @param  DOMNode|DOMElement $domNode  Element to insert after.
      * @param  string             $ellipsis Text used to suffix our document.
-     * @return void
      */
     private static function insertEllipsis($domNode, $ellipsis)
     {
@@ -202,7 +197,6 @@ class TruncateExtension extends Twig_Extension
             } else {
                 $domNode->parentNode->parentNode->appendChild($textNode);
             }
-
         } else {
             // Append to current node
             $domNode->nodeValue = rtrim($domNode->nodeValue) . $ellipsis;

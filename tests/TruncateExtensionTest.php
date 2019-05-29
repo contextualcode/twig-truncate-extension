@@ -1,6 +1,6 @@
 <?php
 
-namespace Bluetel\Twig\Tests;
+namespace ContextualCode\TruncateExtension\Twig\Tests;
 
 use Twig_Environment;
 use Twig_Loader_String;
@@ -21,13 +21,13 @@ class TruncateExtensionTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $loader = new Twig_Loader_String();
-        $this->extension = new \Bluetel\Twig\TruncateExtension();
+        $this->extension = new \ContextualCode\TruncateExtension\Twig\TruncateExtension();
         $this->twig = new Twig_Environment($loader);
         $this->twig->addExtension($this->extension);
     }
 
     /**
-     * @covers Bluetel\Twig\TruncateExtension::getFilters
+     * @covers ContextualCode\TruncateExtension\Twig\TruncateExtension::getFilters
      **/
     public function testGetFilters()
     {
@@ -39,7 +39,7 @@ class TruncateExtensionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Bluetel\Twig\TruncateExtension::truncateLetters
+     * @covers ContextualCode\TruncateExtension\Twig\TruncateExtension::truncateLetters
      */
     public function testLettersTruncation()
     {
@@ -48,7 +48,7 @@ class TruncateExtensionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Bluetel\Twig\TruncateExtension::truncateWords
+     * @covers ContextualCode\TruncateExtension\Twig\TruncateExtension::truncateWords
      */
     public function testWordsTruncation()
     {
@@ -58,7 +58,7 @@ class TruncateExtensionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Ensures we preserve tricky HTML entities.
-     * @covers Bluetel\Twig\TruncateExtension::htmlToDomDocument
+     * @covers ContextualCode\TruncateExtension\Twig\TruncateExtension::htmlToDomDocument
      */
     public function testHtmlEntityConversion()
     {
