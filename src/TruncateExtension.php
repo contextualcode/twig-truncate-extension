@@ -113,18 +113,23 @@ class TruncateExtension extends AbstractExtension
 
         // Iterate over letters.
         $letters = new DOMLettersIterator($body);
+        $hitLimit = false;
         foreach ($letters as $letter) {
             // If we have exceeded the limit, we want to delete the remainder of this document.
             if ($letters->key() >= $limit) {
-                $currentText = $letters->currentTextPosition();
-                $currentText[0]->nodeValue = substr($currentText[0]->nodeValue, 0, $currentText[1] + 1);
-                self::removeProceedingNodes($currentText[0], $body);
+                if ($hitLimit) {
+                    $currentText = $letters->currentTextPosition();
+                    $currentText[0]->nodeValue = substr($currentText[0]->nodeValue, 0, $currentText[1] + 1);
+                    self::removeProceedingNodes($currentText[0], $body);
 
-                if (!empty($ellipsis)) {
-                    self::insertEllipsis($currentText[0], $ellipsis);
+                    if (!empty($ellipsis)) {
+                        self::insertEllipsis($currentText[0], $ellipsis);
+                    }
+
+                    break;
                 }
 
-                break;
+                $hitLimit = true;
             }
         }
 
